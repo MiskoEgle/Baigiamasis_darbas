@@ -1,0 +1,61 @@
+# Python bytecode
+*.pyc
+*.pyo
+__pycache__/
+
+# Priklausomybių aplankas
+env/
+venv/
+.venv/
+*env
+*/env
+
+# IDE specific files
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+
+# Duomenų bazės failai
+*.db
+*.sqlite
+traffic_signs.db
+
+# Apmokyti modeliai ir duomenys
+*.h5
+*.ckpt
+saved_model/
+data/  # Jei duomenys nėra būtini repozitorijoje
+# Vaizdai: geriau saugoti atskirai (pvz., debesyje)
+images/
+
+# Laikini failai
+*.log
+temp/
+tmp/
+*.tmp
+
+# Operacinės sistemos failai
+.DS_Store
+Thumbs.db
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# VS Code specific
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# Configuration File (if it contains sensitive info)
+config.json
+# Neprivaloma: Jei nenorite saugoti šio failo, nes jame yra API raktai arba kita konfidenciali informacija
+
+# Kiti jūsų nurodyti failai
+submission.csv        # Jei nenorite saugoti pateikimo failų
+optuna_results.xlsx   # Jei nenorite saugoti optimizavimo rezultatų
+
+# .env failai
+.env
