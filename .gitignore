@@ -1,0 +1,61 @@
+# Python bytecode
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Virtual environment
+venv/
+env/
+.venv/
+*env/
+*/env/
+
+# IDE & editor settings
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Jupyter notebooks
+.ipynb_checkpoints/
+
+# Data & model files
+*.db
+*.sqlite
+*.csv
+*.xlsx
+*.h5
+*.pkl
+*.ckpt
+saved_model/
+data/
+images/
+traffic_signs.db
+
+# Logs & temp
+*.log
+temp/
+tmp/
+*.tmp
+
+# Large binary files
+*.zip
+*.dll
+*.lib
+
+# Secrets & configs
+.env
+config.json
+
+# Optional experiment/output files
+submission.csv
+optuna_results.xlsx
