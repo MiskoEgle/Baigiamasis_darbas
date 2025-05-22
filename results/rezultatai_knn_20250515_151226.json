@@ -1,0 +1,23 @@
+{
+    "modelio_tipas": "knn",
+    "data": "2025-05-15 15:12:26",
+    "duomenu_failas": "test_data.zip",
+    "pavyzdziu_skaicius": 20,
+    "rezultatai": {
+        "tikslumas": 1.0,
+        "precizi\u0161kumas": 1.0,
+        "atgaminimas": 1.0,
+        "f1_balas": 1.0,
+        "klaiding\u0173_klasifikacij\u0173_matrica": [
+            [
+                10,
+                0
+            ],
+            [
+                0,
+                10
+            ]
+        ],
+        "geriausias_k": 1
+    }
+}

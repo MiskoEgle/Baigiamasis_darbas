@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Rezultatų importavimas{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h1>Rezultatų importavimas</h1>
+    <div class="alert alert-info">
+        {{ message }}
+    </div>
+    <a href="{{ url_for('main.mokyti') }}" class="btn btn-secondary mt-3">Grįžti į mokymo puslapį</a>
+</div>
+{% endblock %} 

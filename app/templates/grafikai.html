@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Grafikų peržiūra{% endblock %}
+{% block content %}
+<h1>Visi grafikai</h1>
+<form method="get" class="mb-4">
+  <label for="modelio_tipas">Pasirinkite modelį:</label>
+  <select id="modelio_tipas" name="modelis" class="form-select w-auto d-inline-block" onchange="this.form.submit()">
+    <option value="knn" {% if modelio_tipas == 'knn' %}selected{% endif %}>KNN</option>
+    <option value="cnn" {% if modelio_tipas == 'cnn' %}selected{% endif %}>CNN</option>
+    <option value="transformer" {% if modelio_tipas == 'transformer' %}selected{% endif %}>Transformer</option>
+  </select>
+</form>
+
+<!-- Naujas blokas: grafikų generavimas iš rezultatų failo -->
+<div class="mb-4">
+  <form id="generate-graphs-form" method="post" action="{{ url_for('main.generuoti_grafikus') }}">
+    <div class="row align-items-end">
+      <div class="col-md-4">
+        <label for="result_file" class="form-label">Pasirinkite rezultatų failą:</label>
+        <select class="form-select" id="result_file" name="result_file" required>
+          {% if modelio_tipas == 'knn' %}
+            {% for f in knn_files %}
+              <option value="knn/{{ f }}">{{ f }}</option>
+            {% endfor %}
+          {% elif modelio_tipas == 'cnn' %}
+            {% for f in cnn_files %}
+              <option value="cnn/{{ f }}">{{ f }}</option>
+            {% endfor %}
+          {% elif modelio_tipas == 'transformer' %}
+            {% for f in transformer_files %}
+              <option value="transformer/{{ f }}">{{ f }}</option>
+            {% endfor %}
+          {% endif %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <input type="hidden" name="modelio_tipas" value="{{ modelio_tipas }}">
+        <button type="submit" class="btn btn-warning">Sugeneruoti grafikus</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<div class="row">
+  {% for grafikas in grafikai %}
+    <div class="col-md-4 mb-4">
+      <div class="card">
+        <img src="{{ url_for('static', filename=grafikas) }}" class="card-img-top" alt="{{ grafikas }}">
+        <div class="card-body">
+          <h5 class="card-title">{{ grafikas }}</h5>
+          <a href="{{ url_for('static', filename=grafikas) }}" target="_blank" class="btn btn-primary">Peržiūrėti didesnį</a>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="col-12"><p>Nėra grafikų.</p></div>
+  {% endfor %}
+</div>
+<a href="{{ url_for('main.mokyti') }}" class="btn btn-secondary mt-3">Grįžti į mokymo puslapį</a>
+{% endblock %} 

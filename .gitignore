@@ -35,11 +35,13 @@ Thumbs.db
 *.xlsx
 *.h5
 *.pkl
+*.png
 *.ckpt
 saved_model/
 data/
 images/
 traffic_signs.db
+
 
 # Logs & temp
 *.log

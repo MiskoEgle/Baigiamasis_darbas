@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Prognozės rezultatas{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="mb-4">Prognozės rezultatas</h1>
+    {% if prognoze %}
+    <div class="card mb-4">
+        <div class="row align-items-center g-0">
+            <div class="col-md-4 text-center">
+                <div class="mb-2"><strong>Testuotas paveikslėlis</strong></div>
+                {% set img_path = prognoze.paveiksliuko_kelias.replace('app/static/', '').replace('static/', '').replace('\\', '/').replace('\\', '/').replace('\\', '/').replace('\\', '/').replace('\\', '/').replace('\\', '/').replace('\\', '/').replace('\\', '/') %}
+                <img src="{{ url_for('static', filename=img_path) }}" class="img-fluid rounded" style="max-width: 200px;" alt="Testinis paveikslėlis">
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Atpažintas ženklas: <strong>{{ prognoze.zenklo_pavadinimas }}</strong></h5>
+                    <p class="card-text">
+                        <strong>Modelio tipas:</strong> {{ prognoze.modelio_tipas|upper }}<br>
+                        <strong>Modelio pavadinimas:</strong> {{ prognoze.modelio_pavadinimas }}<br>
+                        <strong>Tikimybė:</strong> {{ "%.2f"|format(prognoze.tikimybe * 100) }}%<br>
+                        <strong>Data:</strong> {{ prognoze.data.strftime('%Y-%m-%d %H:%M:%S') if prognoze.data else '' }}
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4 text-center">
+                {% if original_img_path %}
+                <div class="mb-2"><strong>Etaloninis ženklas</strong></div>
+                <img src="{{ url_for('static', filename=original_img_path) }}" class="img-fluid rounded" style="max-width: 200px;" alt="Etaloninis ženklas">
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-warning">Prognozės duomenų nerasta.</div>
+    {% endif %}
+    <a href="{{ url_for('main.index') }}" class="btn btn-secondary">Grįžti į pradžią</a>
+</div>
+{% endblock %} 

@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block content %}
+    <header>
+        <h1>Modelių Mokymo ir Testavimo Sistema</h1>
+    </header>
+    <main>
+        <section class="intro">
+            <h2>Sveiki atvykę į Modelių Mokymo ir Testavimo Sistemą</h2>
+            <p>Ši sistema leidžia jums:</p>
+            <ul>
+                <li>Mokyti skirtingus modelius (KNN, CNN, Transformer)</li>
+                <li>Testuoti modelius su naujais duomenimis</li>
+                <li>Peržiūrėti modelių rezultatus ir metrikas</li>
+            </ul>
+        </section>
+        <section class="features">
+            <div class="feature">
+                <h3>KNN Modelis</h3>
+                <p>K-Artimiausių Kaimynų algoritmas, tinkamas klasifikavimo uždaviniams.</p>
+            </div>
+            <div class="feature">
+                <h3>CNN Modelis</h3>
+                <p>Konvoliucinis Neuroninis Tinklas, specializuotas vaizdų apdorojimui.</p>
+            </div>
+            <div class="feature">
+                <h3>Transformer Modelis</h3>
+                <p>Transformer architektūra, efektyvi sekvencių apdorojimui.</p>
+            </div>
+        </section>
+        <section class="cta">
+            <h2>Pradėkite dabar</h2>
+            <p>Pasirinkite, ką norite padaryti:</p>
+            <div class="buttons">
+                <a href="{{ url_for('main.mokyti') }}" class="button">Mokyti Modelį</a>
+                <button type="button" class="button btn btn-success" data-bs-toggle="modal" data-bs-target="#testavimoModal">
+                    Testuoti Modelį
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modalas -->
+    <div class="modal fade" id="testavimoModal" tabindex="-1" aria-labelledby="testavimoModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="testavimoModalLabel">Modelio testavimas</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Uždaryti"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Progreso juosta su užrašu (testavimo metu) -->
+            <div id="testProgressBlock" style="display:none;">
+              <label id="testProgressLabel" for="testProgressBar" class="form-label">Testavimo progresas: <span id="testProgressPercent">0%</span></label>
+              <div class="progress mb-3" style="height: 30px;">
+                <div id="testProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%; font-size:1.2em;">0%</div>
+              </div>
+            </div>
+            <form id="test-form" enctype="multipart/form-data" method="POST" action="{{ url_for('main.prognoze') }}">
+                <div class="form-group mb-2">
+                    <label for="image">Pasirinkite paveikslėlį:</label>
+                    <input type="file" id="image" name="file" accept=".png,.jpg,.jpeg" required class="form-control">
+                </div>
+                <div class="form-group mb-2">
+                    <label for="model-type">Pasirinkite modelio tipą:</label>
+                    <select id="model-type" name="modelio_tipas" required class="form-control" onchange="toggleModelSelect()">
+                        <option value="knn">KNN Modelis</option>
+                        <option value="cnn">CNN Modelis</option>
+                        <option value="transformer">Transformer Modelis</option>
+                    </select>
+                </div>
+                <div class="form-group mb-2" id="knn-model-select-group">
+                    <label for="modelio_pavadinimas_knn">Pasirinkite KNN modelį:</label>
+                    <select id="modelio_pavadinimas_knn" name="modelio_pavadinimas_knn" class="form-control">
+                        {% for model in knn_modeliai %}
+                            <option value="{{ model.pavadinimas }}">{{ model.pavadinimas }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group mb-2" id="cnn-model-select-group">
+                    <label for="modelio_pavadinimas_cnn">Pasirinkite CNN modelį:</label>
+                    <select id="modelio_pavadinimas_cnn" name="modelio_pavadinimas_cnn" class="form-control">
+                        {% for model in cnn_modeliai %}
+                            <option value="{{ model.pavadinimas }}">{{ model.pavadinimas }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group mb-2" id="transformer-model-select-group">
+                    <label for="modelio_pavadinimas_transformer">Pasirinkite Transformer modelį:</label>
+                    <select id="modelio_pavadinimas_transformer" name="modelio_pavadinimas_transformer" class="form-control">
+                        {% for model in transformer_modeliai %}
+                            <option value="{{ model.pavadinimas }}">{{ model.pavadinimas }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Testuoti Modelį</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+    function toggleModelSelect() {
+        var modelType = document.getElementById('model-type').value;
+        document.getElementById('knn-model-select-group').style.display = (modelType === 'knn') ? 'block' : 'none';
+        document.getElementById('cnn-model-select-group').style.display = (modelType === 'cnn') ? 'block' : 'none';
+        document.getElementById('transformer-model-select-group').style.display = (modelType === 'transformer') ? 'block' : 'none';
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleModelSelect();
+    });
+
+    // --- Progreso juostos atnaujinimas testavimo metu ---
+    function updateTestProgress(percent) {
+        const block = document.getElementById('testProgressBlock');
+        const bar = document.getElementById('testProgressBar');
+        const label = document.getElementById('testProgressLabel');
+        const percentSpan = document.getElementById('testProgressPercent');
+        block.style.display = 'block';
+        bar.style.width = percent + '%';
+        bar.textContent = percent + '%';
+        percentSpan.textContent = percent + '%';
+    }
+    // --- Integracija į testavimo formą ---
+    document.getElementById('test-form').addEventListener('submit', function(e) {
+        updateTestProgress(0);
+        setTimeout(() => updateTestProgress(50), 500); // Simuliuotas progresas
+        setTimeout(() => updateTestProgress(100), 1200); // Simuliuotas progresas
+    });
+    </script>
+{% endblock %} 

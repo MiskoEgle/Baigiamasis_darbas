@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Testo vizualizacija{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Testo vizualizacija</h2>
+    {% if test_result %}
+    <div class="row mb-4">
+        <div class="col-md-6 text-center">
+            <h5>Testuotas paveikslėlis</h5>
+            <img src="{{ url_for('static', filename=test_result.paveiksliuko_kelias.replace('app/static/', '')) }}" class="img-fluid border" style="max-height: 250px;">
+        </div>
+        <div class="col-md-6 text-center">
+            <h5>Idealaus ženklo paveikslėlis</h5>
+            {% if original_img_path %}
+                <img src="{{ url_for('static', filename=original_img_path) }}" class="img-fluid border" style="max-height: 250px;">
+            {% else %}
+                <div class="alert alert-warning">Originalaus ženklo paveikslėlis nerastas.</div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col text-center">
+            <h4>{{ test_result.zenklo_pavadinimas }}</h4>
+            <p class="lead">Tikimybė: <strong>{{ (test_result.tikimybe * 100) | round(2) }}%</strong></p>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-info">Testo rezultato nėra.</div>
+    {% endif %}
+    <div class="row">
+        <div class="col text-center">
+            <a href="{{ url_for('main.testuoti') }}" class="btn btn-primary">Grįžti į testavimą</a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

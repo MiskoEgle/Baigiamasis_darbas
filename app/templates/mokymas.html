@@ -1,0 +1,516 @@
+{% extends "base.html" %}
+
+{% block title %}Modelio mokymas{% endblock %}
+
+{% block head %}
+<style>
+.modal-dialog {
+    position: fixed;
+    margin: 0;
+    pointer-events: none;
+}
+
+.modal-dialog .modal-content {
+    pointer-events: auto;
+}
+
+.modal-header {
+    user-select: none;
+}
+
+.modal-header:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+.hidden { display: none !important; }
+.visible { display: block !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Modelio mokymas</h1>
+
+<!-- Klaidų pranešimai -->
+<div id="errorMessages" class="alert alert-danger" style="display:none;"></div>
+
+<div class="col-md-6">
+  <div class="card">
+    <div class="card-header">Mokyti modelį</div>
+    <div class="card-body">
+      <form id="generalTrainForm" action="{{ url_for('main.train') }}" method="post" enctype="multipart/form-data">
+        <div class="mb-3">
+          <label class="form-label">Mokymo tipas</label><br>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="mokymo_tipas" id="mokymoTipasNaujas" value="naujas" checked>
+            <label class="form-check-label" for="mokymoTipasNaujas">Naujas mokymas</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="mokymo_tipas" id="mokymoTipasTesti" value="testi">
+            <label class="form-check-label" for="mokymoTipasTesti">Tęsti mokymą</label>
+          </div>
+        </div>
+        <div class="mb-3" id="fileInputBlock">
+          <label for="trainFile" class="form-label">Pasirinkite mokymo duomenų failą</label>
+          <input class="form-control" type="file" id="trainFile" name="file">
+        </div>
+        <div class="mb-3">
+          <label for="trainModelType" class="form-label">Modelio tipas</label>
+          <select class="form-select" id="trainModelType" name="modelio_tipas">
+            <option value="knn">KNN</option>
+            <option value="cnn">CNN</option>
+            <option value="transformer">Transformeris</option>
+          </select>
+        </div>
+        <div class="mb-3" id="modelNameBlock">
+          <label for="modelName" class="form-label">Modelio pavadinimas</label>
+          <input class="form-control" type="text" id="modelName" name="modelio_pavadinimas" maxlength="255" placeholder="Pvz.: KNN_2024_geriausias">
+        </div>
+        <button type="submit" class="btn btn-primary" id="trainBtn" disabled>Mokyti</button>
+        <button type="button" class="btn btn-danger ms-2" id="stopTrainingBtn" style="display:none;">Sustabdyti apmokymą</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Duomenų paruošimo mygtukas ir modalas -->
+<div class="mt-3">
+  <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#dataPrepModal">
+    Paruošti duomenis
+  </button>
+</div>
+
+<!-- Duomenų paruošimo modalas -->
+<div class="modal fade" id="dataPrepModal" tabindex="-1" aria-labelledby="dataPrepModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header" style="cursor: move;">
+        <h5 class="modal-title" id="dataPrepModalLabel">Duomenų paruošimas</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Uždaryti"></button>
+      </div>
+      <div class="modal-body">
+        <form id="dataPrepForm">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="trainDir" class="form-label">Mokymo paveikslėlių katalogas</label>
+                <input type="text" class="form-control" id="trainDir" name="train_dir" value="duomenys/Train">
+              </div>
+              <div class="mb-3">
+                <label for="trainCsvPath" class="form-label">Mokymo CSV kelias</label>
+                <input type="text" class="form-control" id="trainCsvPath" name="train_csv_path" value="duomenys/Train.csv">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="outputNormPath" class="form-label">Išvesties CSV (normalizuotas)</label>
+                <input type="text" class="form-control" id="outputNormPath" name="output_norm_path" value="duomenys/knn_train_norm.csv">
+              </div>
+              <div class="mb-3">
+                <label for="outputOrigPath" class="form-label">Išvesties CSV (originalus)</label>
+                <input type="text" class="form-control" id="outputOrigPath" name="output_orig_path" value="duomenys/knn_train.csv">
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Uždaryti</button>
+        <button type="button" class="btn btn-primary" id="prepareDataBtn">Paruošti duomenis</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Progreso indikatorius su žingsniais ir laikmačiu -->
+<div id="progressSpinner" class="text-center my-4 progress-spinner" style="display:none;">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Vyksta mokymas...</span>
+  </div>
+  <div id="progressStep" class="mt-2">Mokymas vyksta, prašome palaukti...</div>
+  <div id="progressTimer" class="mt-2 text-muted progress-timer" style="font-size:1.1em;"></div>
+</div>
+
+<!-- Rezultatų atvaizdavimas -->
+<div id="trainingResults" style="display:none;">
+  <h3 class="mt-4">Rezultatai</h3>
+  <div id="metricsBlock"></div>
+  <div id="imagesBlock" class="row mt-3"></div>
+  <div id="finalTimer" class="mt-3 text-muted" style="font-size:1.1em;"></div>
+</div>
+
+<!-- Progreso informacija -->
+<div id="progressInfo" class="alert alert-info" style="display:none;"></div>
+
+<!-- Progreso juosta su užrašu (mokymo metu) -->
+<div id="trainProgressBlock" style="display:none;">
+  <label id="trainProgressLabel" for="progressBar" class="form-label">Mokymo progresas: <span id="trainProgressPercent">0%</span></label>
+  <div class="progress mb-3" style="height: 30px;">
+    <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%; font-size:1.2em;">0%</div>
+  </div>
+</div>
+
+<!-- Progreso juosta su užrašu (duomenų paruošimo modalas) -->
+<div id="dataPrepProgressBlock" class="progress-info hidden">
+  <label id="dataPrepProgressLabel" for="dataPrepProgressBar" class="form-label">
+    Duomenų paruošimo progresas: <span id="dataPrepProgressPercent">0%</span>
+    <span id="dataPrepProgressCount" style="margin-left: 15px; font-weight: normal; color: #555;"></span>
+  </label>
+  <div class="progress mb-3" style="height: 30px;">
+    <div id="dataPrepProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%; font-size:1.2em;">0%</div>
+  </div>
+</div>
+
+<!-- Numatyto likusio laiko rodymas -->
+<div id="etaBlock" class="mb-3" style="display:none;"></div>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="alert alert-info">
+      {{ messages[0] }}
+    </div>
+  {% endif %}
+{% endwith %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Klaidų valdymas
+function showError(message) {
+    const errorDiv = document.getElementById('errorMessages');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+    setTimeout(() => {
+        errorDiv.style.display = 'none';
+    }, 5000);
+}
+
+// --- Mokymo mygtuko valdymas ---
+const fileInputBlock = document.getElementById('fileInputBlock');
+const modelNameBlock = document.getElementById('modelNameBlock');
+const modelNameInput = document.getElementById('modelName');
+const trainBtn = document.getElementById('trainBtn');
+const trainModelType = document.getElementById('trainModelType');
+const progressSpinner = document.getElementById('progressSpinner');
+const progressStep = document.getElementById('progressStep');
+const progressTimer = document.getElementById('progressTimer');
+const progressBarBlock = document.getElementById('progressBarBlock');
+const progressBar = document.getElementById('progressBar');
+const stopTrainingBtn = document.getElementById('stopTrainingBtn');
+
+// Funkcija mygtuko būsenos atnaujinimui
+function updateFormState() {
+    const modelName = modelNameInput.value.trim();
+    trainBtn.disabled = modelName === '';
+}
+
+// Pridedame event listener'į modelio pavadinimo įvedimui
+modelNameInput.addEventListener('input', updateFormState);
+
+// Inicializuojame pradinę būseną
+updateFormState();
+
+// --- Mokymo proceso sekimas ---
+let startTime = null;
+let progressInterval = null;
+let progressPolling = null;
+
+function updateTimer() {
+    if (!startTime) return;
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const minutes = Math.floor(elapsed / 60);
+    const seconds = elapsed % 60;
+    progressTimer.textContent = `Praėjo laiko: ${minutes}min ${seconds}s`;
+}
+
+// --- Progreso juostos atnaujinimas mokymo metu ---
+function updateTrainProgress(percent) {
+    const block = document.getElementById('trainProgressBlock');
+    const bar = document.getElementById('progressBar');
+    const label = document.getElementById('trainProgressLabel');
+    const percentSpan = document.getElementById('trainProgressPercent');
+    block.style.display = 'block';
+    bar.style.width = percent + '%';
+    bar.textContent = percent + '%';
+    percentSpan.textContent = percent + '%';
+}
+
+// --- Progreso juostos atnaujinimas duomenų paruošimo metu ---
+function updateDataPrepProgress(percent, current, total) {
+    const block = document.getElementById('dataPrepProgressBlock');
+    const bar = document.getElementById('dataPrepProgressBar');
+    const label = document.getElementById('dataPrepProgressLabel');
+    const percentSpan = document.getElementById('dataPrepProgressPercent');
+    const countSpan = document.getElementById('dataPrepProgressCount');
+    block.classList.remove('hidden');
+    block.classList.add('visible');
+    bar.style.width = percent + '%';
+    bar.textContent = percent + '%';
+    percentSpan.textContent = percent + '%';
+    if (current !== undefined && total !== undefined) {
+        countSpan.textContent = `(${current}/${total})`;
+    }
+}
+
+// --- Mokymo proceso valdymas ---
+document.getElementById('generalTrainForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Patikrinti ar įvestas modelio pavadinimas
+    if (modelNameInput.value.trim() === '') {
+        showError('Prašome įvesti modelio pavadinimą');
+        return;
+    }
+    
+    // Pradėti mokymo procesą
+    startTime = Date.now();
+    progressInterval = setInterval(updateTimer, 1000);
+    progressSpinner.style.display = 'block';
+    trainBtn.disabled = true;
+    stopTrainingBtn.style.display = 'inline-block';
+    
+    // Siųsti užklausą į serverį
+    const formData = new FormData(this);
+    fetch(this.action, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Mokymas sėkmingas
+            clearInterval(progressInterval);
+            progressSpinner.style.display = 'none';
+            stopTrainingBtn.style.display = 'none';
+            trainBtn.disabled = false;
+            
+            // Rodyti rezultatus
+            document.getElementById('trainingResults').style.display = 'block';
+            // Čia galite pridėti rezultatų atvaizdavimo logiką
+        } else {
+            // Mokymas nepavyko
+            showError(data.message || 'Įvyko klaida mokant modelį');
+            clearInterval(progressInterval);
+            progressSpinner.style.display = 'none';
+            stopTrainingBtn.style.display = 'none';
+            trainBtn.disabled = false;
+        }
+    })
+    .catch(error => {
+        showError('Įvyko klaida: ' + error.message);
+        clearInterval(progressInterval);
+        progressSpinner.style.display = 'none';
+        stopTrainingBtn.style.display = 'none';
+        trainBtn.disabled = false;
+    });
+});
+
+// --- Mokymo sustabdymo logika ---
+document.getElementById('stopTrainingBtn').addEventListener('click', function() {
+    if (confirm('Ar tikrai norite sustabdyti mokymą?')) {
+        fetch('/stop_training', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'model_type=' + trainModelType.value
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                showError(data.message);
+            }
+        })
+        .catch(error => {
+            showError('Klaida sustabdant mokymą: ' + error.message);
+        });
+    }
+});
+
+// --- Duomenų paruošimo logika ---
+document.getElementById('prepareDataBtn').addEventListener('click', function() {
+    const form = document.getElementById('dataPrepForm');
+    const formData = new FormData(form);
+    // Rodyti progreso indikatorių
+    progressSpinner.style.display = 'block';
+    progressStep.textContent = 'Paruošiami duomenys...';
+    startDataPrepProgress();
+    // --- Nauja: pradėti progreso polling ir laikrodį ---
+    dataPrepStartTime = Date.now();
+    dataPrepInterval = setInterval(updateDataPrepTimer, 1000);
+    dataPrepPolling = setInterval(pollDataPrepProgress, 1000);
+    fetch('/paruosti_duomenis', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        updateDataPrepProgress(100, data.current, data.total);
+        clearInterval(dataPrepInterval);
+        clearInterval(dataPrepPolling);
+        if (data.klaida) {
+            throw new Error(data.klaida);
+        }
+        // Rodyti sėkmės pranešimą
+        showError('Duomenys sėkmingai paruošti!');
+        // Uždaryti modalą
+        const modal = bootstrap.Modal.getInstance(document.getElementById('dataPrepModal'));
+        modal.hide();
+        progressSpinner.style.display = 'none';
+    })
+    .catch(error => {
+        updateDataPrepProgress(0, 0, 0);
+        clearInterval(dataPrepInterval);
+        clearInterval(dataPrepPolling);
+        showError(error.message || 'Įvyko klaida ruošiant duomenis');
+        progressSpinner.style.display = 'none';
+    });
+});
+
+// --- Duomenų paruošimo progreso polling ---
+let dataPrepInterval = null;
+let dataPrepPolling = null;
+let dataPrepStartTime = null;
+function pollDataPrepProgress() {
+    fetch('/progresas')
+        .then(res => res.json())
+        .then(data => {
+            const prog = data['data_prep'];
+            if (!prog) return;
+            updateDataPrepProgress(prog.percent, prog.current, prog.total);
+            // Progreso blokas visada matomas
+            const progressBlock = document.getElementById('dataPrepProgressBlock');
+            progressBlock.classList.remove('hidden');
+            progressBlock.classList.add('visible');
+            // Update progress message
+            if (prog.message) {
+                progressStep.textContent = prog.message;
+            }
+            // Update ETA
+            if (prog.eta !== null) {
+                const etaMinutes = Math.floor(prog.eta / 60);
+                const etaSeconds = prog.eta % 60;
+                document.getElementById('etaBlock').textContent = 
+                    `Numatomas likęs laikas: ${etaMinutes}min ${etaSeconds}s`;
+            }
+            // Check if data prep is complete or stopped
+            if (prog.status === 'completed' || prog.status === 'error') {
+                clearInterval(dataPrepPolling);
+                clearInterval(dataPrepInterval);
+                // Paslėpti laikrodį ir besisukantį ratelį
+                const spinner = document.getElementById('progressSpinner');
+                spinner.classList.add('hidden');
+                spinner.classList.remove('visible');
+                document.getElementById('etaBlock').classList.add('hidden');
+                // Progreso blokas lieka matomas, kad matytųsi galutinis rezultatas
+                if (prog.status === 'completed') {
+                    progressStep.textContent = 'Duomenų paruošimas baigtas!';
+                } else {
+                    progressStep.textContent = 'Įvyko klaida duomenų paruošimo metu.';
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error polling data prep progress:', error);
+        });
+}
+function updateDataPrepTimer() {
+    if (!dataPrepStartTime) return;
+    const elapsed = Math.floor((Date.now() - dataPrepStartTime) / 1000);
+    const minutes = Math.floor(elapsed / 60);
+    const seconds = elapsed % 60;
+    progressTimer.textContent = `Praėjo laiko: ${minutes}min ${seconds}s`;
+}
+
+// --- Modalų judinimo logika ---
+document.addEventListener('DOMContentLoaded', function() {
+    const modals = document.querySelectorAll('.modal');
+    
+    modals.forEach(modal => {
+        const modalDialog = modal.querySelector('.modal-dialog');
+        const modalHeader = modal.querySelector('.modal-header');
+        let isDragging = false;
+        let currentX;
+        let currentY;
+        let initialX;
+        let initialY;
+        let xOffset = 0;
+        let yOffset = 0;
+        
+        // Nustatyti pradinę poziciją
+        function setTranslate(xPos, yPos, el) {
+            el.style.transform = `translate3d(${xPos}px, ${yPos}px, 0)`;
+        }
+        
+        // Pradėti tempimą
+        modalHeader.addEventListener('mousedown', dragStart);
+        
+        // Baigti tempimą
+        document.addEventListener('mouseup', dragEnd);
+        
+        // Judėti
+        document.addEventListener('mousemove', drag);
+        
+        function dragStart(e) {
+            if (e.target.classList.contains('btn-close')) return;
+            
+            initialX = e.clientX - xOffset;
+            initialY = e.clientY - yOffset;
+            
+            if (e.target === modalHeader) {
+                isDragging = true;
+            }
+        }
+        
+        function dragEnd(e) {
+            initialX = currentX;
+            initialY = currentY;
+            isDragging = false;
+        }
+        
+        function drag(e) {
+            if (isDragging) {
+                e.preventDefault();
+                
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+                
+                xOffset = currentX;
+                yOffset = currentY;
+                
+                // Gauti modalo ribas
+                const modalRect = modalDialog.getBoundingClientRect();
+                const windowWidth = window.innerWidth;
+                const windowHeight = window.innerHeight;
+                
+                // Apriboti judesį ekrano ribose
+                if (currentX < -modalRect.width + 100) currentX = -modalRect.width + 100;
+                if (currentX > windowWidth - 100) currentX = windowWidth - 100;
+                if (currentY < 0) currentY = 0;
+                if (currentY > windowHeight - 50) currentY = windowHeight - 50;
+                
+                setTranslate(currentX, currentY, modalDialog);
+            }
+        }
+        
+        // Atstatyti poziciją kai modalas uždaromas
+        modal.addEventListener('hidden.bs.modal', function() {
+            xOffset = 0;
+            yOffset = 0;
+            setTranslate(0, 0, modalDialog);
+        });
+    });
+});
+
+// --- Duomenų paruošimo logika ---
+function startDataPrepProgress() {
+    updateDataPrepProgress(0, 0, 0);
+    const progressBlock = document.getElementById('dataPrepProgressBlock');
+    progressBlock.classList.remove('hidden');
+    progressBlock.classList.add('visible');
+    const spinner = document.getElementById('progressSpinner');
+    spinner.classList.remove('hidden');
+    spinner.classList.add('visible');
+    document.getElementById('etaBlock').classList.remove('hidden');
+}
+</script>
+{% endblock %} 

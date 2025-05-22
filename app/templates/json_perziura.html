@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}JSON failo peržiūra{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h1>JSON failo peržiūra: {{ failo_pavadinimas }}</h1>
+    
+    {% if klaida %}
+    <div class="alert alert-danger">
+        {{ klaida }}
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="card-body">
+            <pre class="json-content">{{ turinys | tojson(indent=2) }}</pre>
+        </div>
+    </div>
+    {% endif %}
+    
+    <a href="{{ url_for('main.json_failai') }}" class="btn btn-secondary mt-3">Grįžti į JSON failų sąrašą</a>
+</div>
+
+<style>
+.json-content {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+</style>
+{% endblock %} 

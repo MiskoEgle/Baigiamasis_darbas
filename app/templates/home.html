@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row align-items-center">
+        <div class="col-md-6">
+            <h1 class="display-4 fw-bold mb-4">Kelio ženklų atpažinimas su dirbtiniu intelektu</h1>
+            <p class="lead mb-4">Išbandykite modernią sistemą, kuri automatiškai atpažįsta Lietuvos ir Europos kelių ženklus naudojant pažangius dirbtinio intelekto modelius (KNN, CNN, Transformer). Tai puikus įrankis mokslui, švietimui ir inovatyviems projektams!</p>
+            <a href="{{ url_for('main.index') }}" class="btn btn-primary btn-lg">Pradėti naudotis</a>
+        </div>
+        <div class="col-md-6 text-center">
+            <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80" alt="Kelio ženklai" class="img-fluid rounded shadow-lg" style="max-height: 350px;">
+        </div>
+    </div>
+    <div class="row mt-5">
+        <div class="col-12 text-center">
+            <h2 class="mb-3">Kodėl verta rinktis šią sistemą?</h2>
+            <ul class="why-list">
+                <li>Greitas ir tikslus ženklų atpažinimas</li>
+                <li>Paprasta naudoti net pradedantiesiems</li>
+                <li>Galimybė mokyti modelius su savo duomenimis</li>
+                <li>Vizualūs rezultatai ir analizė</li>
+                <li>Atvira ir pritaikoma įvairiems poreikiams</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %} 

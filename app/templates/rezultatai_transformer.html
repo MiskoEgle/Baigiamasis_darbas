@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block title %}Transformer Modelio rezultatai{% endblock %}
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Transformer Modelio rezultatai</h1>
+    
+    <!-- Testavimo mygtukas -->
+    <div class="mb-4">
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#testavimoModal">
+            Testuoti modelį
+        </button>
+    </div>
+
+    <!-- Transformer modelių pasirinkimas -->
+    <div class="mb-3">
+        <label for="transformer-model-select">Pasirinkite Transformer modelį:</label>
+        <select id="transformer-model-select" class="form-control">
+            {% for model in transformer_modeliai %}
+                <option value="{{ model.pavadinimas }}">{{ model.pavadinimas }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Skirtukai -->
+    <ul class="nav nav-tabs custom-tabs mb-4" id="resultsTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a class="nav-link active" id="training-tab" data-bs-toggle="tab" href="#training" role="tab" aria-controls="training" aria-selected="true">Mokymo rezultatai</a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a class="nav-link" id="testing-tab" data-bs-toggle="tab" href="#testing" role="tab" aria-controls="testing" aria-selected="false">Testavimo rezultatai</a>
+        </li>
+    </ul>
+
+    <!-- Turinys -->
+    <div class="tab-content" id="resultsTabsContent">
+        <!-- Mokymo rezultatai -->
+        <div class="tab-pane fade show active" id="training" role="tabpanel" aria-labelledby="training-tab">
+            {% if transformer_results %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Duomenų failas</th>
+                            <th>Pavyzdžių skaičius</th>
+                            <th>Metrikos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in transformer_results %}
+                        <tr>
+                            <td>{{ result.data if result.data else '-' }}</td>
+                            <td>{{ result.duomenu_failas if result.duomenu_failas else '-' }}</td>
+                            <td>{{ result.pavyzdziu_skaicius if result.pavyzdziu_skaicius else '-' }}</td>
+                            <td>
+                                {% set metrikos = result.metrikos if result.metrikos else result.rezultatai %}
+                                <ul>
+                                    <li>Tikslumas: {{ metrikos.tikslumas is defined and metrikos.tikslumas is not none and ("%.2f"|format(metrikos.tikslumas * 100)) ~ '%' or 'N/A' }}</li>
+                                    <li>Preciziškumas: {{ metrikos['preciziškumas'] is defined and metrikos['preciziškumas'] is not none and ("%.2f"|format(metrikos['preciziškumas'] * 100)) ~ '%' or 'N/A' }}</li>
+                                    <li>Atgaminimas: {{ metrikos.atgaminimas is defined and metrikos.atgaminimas is not none and ("%.2f"|format(metrikos.atgaminimas * 100)) ~ '%' or 'N/A' }}</li>
+                                    <li>F1 balas: {{ metrikos.f1_balas is defined and metrikos.f1_balas is not none and ("%.2f"|format(metrikos.f1_balas * 100)) ~ '%' or 'N/A' }}</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info">Transformer modelio rezultatų nėra.</div>
+            {% endif %}
+        </div>
+
+        <!-- Testavimo rezultatai -->
+        <div class="tab-pane fade" id="testing" role="tabpanel" aria-labelledby="testing-tab">
+            <div class="row">
+                {% for test_result in test_results %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <img src="{{ url_for('static', filename=test_result.paveiksliuko_kelias.replace('app/static/', '')) }}" 
+                             class="card-img-top" alt="Testinis paveiksliukas">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ test_result.zenklo_pavadinimas }}</h5>
+                            <p class="card-text">
+                                <strong>Modelis:</strong> {{ test_result.modelio_pavadinimas }}<br>
+                                <strong>Data:</strong> {{ test_result.data.strftime('%Y-%m-%d %H:%M:%S') }}<br>
+                                <strong>Tikimybė:</strong> {{ "%.2f"|format(test_result.tikimybe * 100) }}%
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% if not test_results %}
+            <div class="alert alert-info">
+                Testavimo rezultatų nėra.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Modalas -->
+    <div class="modal fade" id="testavimoModal" tabindex="-1" aria-labelledby="testavimoModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="testavimoModalLabel">Transformer Modelio testavimas</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Uždaryti"></button>
+          </div>
+          <div class="modal-body">
+            <form id="test-form" enctype="multipart/form-data" method="POST" action="{{ url_for('main.prognoze') }}">
+                <input type="hidden" name="modelio_tipas" value="transformer">
+                <div class="form-group mb-2">
+                    <label for="image">Pasirinkite paveikslėlį:</label>
+                    <input type="file" id="image" name="file" accept=".png,.jpg,.jpeg" required class="form-control">
+                </div>
+                <div class="form-group mb-2">
+                    <label for="modelio_pavadinimas_transformer">Pasirinkite Transformer modelį:</label>
+                    <select id="modelio_pavadinimas_transformer" name="modelio_pavadinimas_transformer" class="form-control">
+                        {% for model in transformer_modeliai %}
+                            <option value="{{ model.pavadinimas }}">{{ model.pavadinimas }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Testuoti Modelį</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Išsaugoti aktyvų skirtuką URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab');
+    if (tab === 'testing') {
+        document.getElementById('testing-tab').click();
+    }
+    
+    // Atnaujinti URL kai pasirenkamas skirtukas
+    document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(button => {
+        button.addEventListener('click', function() {
+            const tabId = this.getAttribute('data-bs-target').substring(1);
+            const url = new URL(window.location.href);
+            url.searchParams.set('tab', tabId);
+            window.history.pushState({}, '', url);
+        });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %} 

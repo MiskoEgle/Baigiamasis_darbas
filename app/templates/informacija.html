@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Modelių tipai: paaiškinimas</h1>
+
+<h2>KNN (Artimiausių kaimynų metodas)</h2>
+<p><b>KNN</b> yra paprastas, bet efektyvus klasifikavimo algoritmas, kuris nenaudoja vidinio mokymosi proceso. Vietoje to, jis lygina naują pavyzdį su visais mokymo duomenimis ir priskiria jam tą klasę, kuri dažniausiai pasitaiko tarp artimiausių (pagal atstumą) kaimynų.</p>
+<ul>
+  <li><b>Privalumai:</b> Paprastas, lengvai suprantamas, gerai veikia su nedideliais duomenų kiekiais.</li>
+  <li><b>Trūkumai:</b> Lėtas su dideliais duomenų kiekiais, jautrus nereikšmingiems požymiams ir duomenų masteliui.</li>
+</ul>
+
+<h2>CNN (Konvoliucinis neuroninis tinklas)</h2>
+<p><b>CNN</b> yra gilus neuroninis tinklas, ypač tinkamas vaizdų atpažinimui. Jis automatiškai išmoksta svarbius vaizdo požymius (pvz., kraštus, formas) ir juos naudoja klasifikavimui.</p>
+<ul>
+  <li><b>Privalumai:</b> Labai gerai veikia su vaizdais ir sudėtingais duomenimis, automatiškai išmoksta svarbius požymius.</li>
+  <li><b>Trūkumai:</b> Reikalauja daugiau duomenų ir skaičiavimo resursų, sudėtingesnis nei KNN.</li>
+</ul>
+
+<h2>Transformeris (Vision Transformer, ViT)</h2>
+<p><b>Transformeris</b> – moderni architektūra, kuri dalina paveikslėlį į mažus "pleistrus" ir kiekvieną jų apdoroja kaip seką, naudodamas dėmesio (attention) mechanizmą. Puikiai tinka dideliems duomenų kiekiams ir sudėtingiems ryšiams tarp vaizdo dalių.</p>
+<ul>
+  <li><b>Privalumai:</b> Puikiai veikia su dideliais duomenų kiekiais, gali pastebėti sudėtingus ryšius tarp skirtingų vaizdo dalių.</li>
+  <li><b>Trūkumai:</b> Reikalauja daug duomenų ir skaičiavimo galios, sudėtingesnis nei CNN ar KNN.</li>
+</ul>
+
+<h3>Santrauka</h3>
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Modelis</th>
+      <th>Privalumai</th>
+      <th>Trūkumai</th>
+      <th>Kada rinktis?</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>KNN</td>
+      <td>Paprastas, greitas su mažais duomenimis</td>
+      <td>Lėtas su dideliais duomenimis, jautrus triukšmui</td>
+      <td>Kai duomenų nedaug, reikia paprasto sprendimo</td>
+    </tr>
+    <tr>
+      <td>CNN</td>
+      <td>Puikiai tinka vaizdams, automatiškai išmoksta požymius</td>
+      <td>Reikia daugiau duomenų ir resursų</td>
+      <td>Kai norite gerų rezultatų su vaizdais</td>
+    </tr>
+    <tr>
+      <td>Transformeris</td>
+      <td>Labai galingas, gerai veikia su dideliais duomenimis</td>
+      <td>Labai resursų reikalaujantis, sudėtingas</td>
+      <td>Kai turite daug duomenų ir norite pažangiausio metodo</td>
+    </tr>
+  </tbody>
+</table>
+{% endblock %} 

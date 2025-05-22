@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modelių Testavimas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Modelių Mokymo ir Testavimo Sistema</h1>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('main.index') }}">Pagrindinis</a></li>
+                    <li><a href="{{ url_for('main.mokyti') }}">Mokyti</a></li>
+                    <li><a href="{{ url_for('main.testuoti') }}" class="active">Testuoti</a></li>
+                </ul>
+            </nav>
+        </header>
+        
+        <main>
+            <section class="testing">
+                <h2>Modelių Testavimas</h2>
+                
+                <form id="test-form" enctype="multipart/form-data" method="POST" action="{{ url_for('main.prognoze') }}">
+                    <div class="form-group">
+                        <label for="image">Pasirinkite paveikslėlį:</label>
+                        <input type="file" id="image" name="file" accept=".png,.jpg,.jpeg" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="model-type">Pasirinkite modelio tipą:</label>
+                        <select id="model-type" name="modelio_tipas" required onchange="toggleModelSelect()">
+                            <option value="knn">KNN Modelis</option>
+                            <option value="cnn">CNN Modelis</option>
+                            <option value="transformer">Transformer Modelis</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="knn-model-select-group">
+                        <label for="modelio_pavadinimas_knn">Pasirinkite KNN modelį:</label>
+                        <select id="modelio_pavadinimas_knn" name="modelio_pavadinimas_knn">
+                            {% for model in knn_modeliai %}
+                                <option value="{{ model.pavadinimas }}">{{ model.pavadinimas }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group" id="cnn-model-select-group">
+                        <label for="modelio_pavadinimas_cnn">Pasirinkite CNN modelį:</label>
+                        <select id="modelio_pavadinimas_cnn" name="modelio_pavadinimas_cnn">
+                            {% for model in cnn_modeliai %}
+                                <option value="{{ model.pavadinimas }}">{{ model.pavadinimas }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group" id="transformer-model-select-group">
+                        <label for="modelio_pavadinimas_transformer">Pasirinkite Transformer modelį:</label>
+                        <select id="modelio_pavadinimas_transformer" name="modelio_pavadinimas_transformer">
+                            {% for model in transformer_modeliai %}
+                                <option value="{{ model.pavadinimas }}">{{ model.pavadinimas }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="button">Testuoti Modelį</button>
+                </form>
+                
+                <div id="preview" class="preview" style="display: none;">
+                    <h3>Paveikslėlio peržiūra</h3>
+                    <img id="preview-image" src="" alt="Paveikslėlio peržiūra">
+                </div>
+                
+                <div id="result" class="result" style="display: none;">
+                    <h3>Prognozės rezultatas</h3>
+                    <p>Prognozuota klasė: <span id="prediction">-</span></p>
+                    <p>Tikimybė: <span id="confidence">-</span>%</p>
+                </div>
+                
+                <div id="alert" class="alert" style="display: none;"></div>
+            </section>
+        </main>
+        
+        <footer>
+            <p>&copy; 2024 Modelių Mokymo ir Testavimo Sistema. Visos teisės saugomos.</p>
+        </footer>
+    </div>
+    
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+    function toggleModelSelect() {
+        var modelType = document.getElementById('model-type').value;
+        document.getElementById('knn-model-select-group').style.display = (modelType === 'knn') ? 'block' : 'none';
+        document.getElementById('cnn-model-select-group').style.display = (modelType === 'cnn') ? 'block' : 'none';
+        document.getElementById('transformer-model-select-group').style.display = (modelType === 'transformer') ? 'block' : 'none';
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleModelSelect();
+    });
+    </script>
+</body>
+</html> 

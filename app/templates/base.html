@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Modelių sistema{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+    <style>
+    body {
+        padding-top: 70px;
+        padding-bottom: 70px; /* Add bottom padding for fixed footer */
+    }
+    .footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        z-index: 1030;
+        background: #f8f9fa;
+        border-top: 1px solid #e7e7e7;
+    }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">Kelio Ženklų Atpažinimas</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto main-navbar">
+                    <li class="nav-item">
+                        <a class="nav-link{% if request.endpoint == 'main.index' %} active{% endif %}" href="{{ url_for('main.index') }}">Pradžia</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle{% if request.endpoint in ['main.rezultatai', 'main.rezultatai_cnn', 'main.rezultatai_transformer'] %} active{% endif %}" href="#" id="rezultataiDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Rezultatai
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="rezultataiDropdown">
+                            <li><a class="dropdown-item{% if request.endpoint == 'main.rezultatai' %} active{% endif %}" href="{{ url_for('main.rezultatai') }}">KNN Rezultatai</a></li>
+                            <li><a class="dropdown-item{% if request.endpoint == 'main.rezultatai_cnn' %} active{% endif %}" href="{{ url_for('main.rezultatai_cnn') }}">CNN Rezultatai</a></li>
+                            <li><a class="dropdown-item{% if request.endpoint == 'main.rezultatai_transformer' %} active{% endif %}" href="{{ url_for('main.rezultatai_transformer') }}">Transformer Rezultatai</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link{% if request.endpoint == 'main.mokyti' %} active{% endif %}" href="{{ url_for('main.mokyti') }}">Modelio mokymas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link{% if request.endpoint == 'main.grafikai' %} active{% endif %}" href="{{ url_for('main.grafikai') }}">Grafikai</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link{% if request.endpoint == 'main.json_failai' %} active{% endif %}" href="{{ url_for('main.json_failai') }}">JSON failai</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto main-navbar">
+                    <li class="nav-item dropdown info-dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="infoDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Informacija
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="infoDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('main.informacija') }}">Programos aprašymas</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.naudojimas') }}">Naudojimosi instrukcija</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- KNN apmokymo mygtukas ir pranešimai pašalinti, bus tik mokymas.html -->
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer class="footer mt-5 py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">Kelio ženklų atpažinimo sistema</span>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html> 

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Naudojimosi instrukcija</h1>
+
+<ol>
+  <li>
+    <b>Pagrindinis puslapis:</b> Galite pasirinkti, ar norite mokyti modelį, ar atlikti prognozę. Visi veiksmai ir grafikai pateikiami lietuvių kalba.
+  </li>
+  <li>
+    <b>Modelio mokymas:</b>
+    <ul>
+      <li>Galite įkelti <b>CSV</b> arba <b>ZIP</b> failą su mokymo duomenimis. ZIP archyve kiekvienas katalogas turi atitikti ženklų klasę, o CSV faile – nurodytas paveikslėlių nuorodos ir klasės.</li>
+      <li>Failų pavyzdžius rasite meniu arba <a href="{{ url_for('static', filename='examples/zenklu_mokymo_pavyzdys.zip') }}" download>ZIP pavyzdys</a> / <a href="{{ url_for('static', filename='examples/kelio_zenklai_pavyzdys.csv') }}" download>CSV pavyzdys</a>.</li>
+      <li>Įkelkite failą, pasirinkite modelio tipą (KNN, CNN, Transformer) ir spauskite <b>Mokyti</b>. Sistema automatiškai apdoros duomenis, apmokys modelį ir sugeneruos visus grafikus.</li>
+      <li><b>Automatinis paveikslėlių apdorojimas:</b> Nereikia rūpintis paveikslėlių tipu, dydžiu ar spalvomis – sistema viską padaro automatiškai.</li>
+      <li>Rezultatus ir grafikus rasite skiltyje <b>Grafikai</b> ir <b>Rezultatai</b>.</li>
+    </ul>
+  </li>
+  <li>
+    <b>Prognozavimas:</b>
+    <ul>
+      <li>Įkelkite bet kokį paveikslėlį (JPG, PNG, spalvotas ar pilkas, bet kokio dydžio). Sistema automatiškai konvertuos į reikiamą formatą (32x32, RGB, uint8).</li>
+      <li>Pasirinkite modelio tipą ir spauskite <b>Prognozuoti</b>. Sistema pateiks atpažinto ženklo rezultatą.</li>
+      <li><b>Klaidos dėl paveikslėlio tipo (OpenCV HOG/Haar)</b> – išspręstos automatiškai, nereikia papildomų veiksmų.</li>
+    </ul>
+  </li>
+  <li>
+    <b>Grafikai ir rezultatai:</b>
+    <ul>
+      <li>Visi mokymo ir validacijos grafikai, sumaišties matricos, klasių pasiskirstymai ir kt. automatiškai sugeneruojami ir pasiekiami per meniu <b>Grafikai</b>.</li>
+      <li>Rezultatus galima peržiūrėti ir JSON formatu.</li>
+    </ul>
+  </li>
+  <li>
+    <b>Modelių paaiškinimai:</b> Skiltyje <b>Informacija</b> rasite išsamius modelių tipų aprašymus ir jų palyginimą.</li>
+</ol>
+
+<p><b>Pastaba:</b> Visa sistema ir grafikai yra lietuvių kalba. Jei kyla klausimų ar nesklandumų, kreipkitės į sistemos administratorių.</p>
+{% endblock %} 

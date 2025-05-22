@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}JSON failų sąrašas{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h1>JSON failų sąrašas</h1>
+    <div class="list-group">
+        {% for failas in failai %}
+            <a href="{{ url_for('main.perziureti_json_faila', failo_pavadinimas=failas) }}" class="list-group-item list-group-item-action">
+                {{ failas }}
+            </a>
+        {% else %}
+            <p class="text-muted">Nėra JSON failų.</p>
+        {% endfor %}
+    </div>
+    <a href="{{ url_for('main.mokyti') }}" class="btn btn-secondary mt-3">Grįžti į mokymo puslapį</a>
+</div>
+{% endblock %} 
